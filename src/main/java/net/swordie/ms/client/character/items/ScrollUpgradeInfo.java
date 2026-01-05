@@ -69,15 +69,21 @@ public class ScrollUpgradeInfo implements Encodable {
                     return false;
                 }
 
-                //int chance = getChance() + chr.getAvatarData().getCharacterStat().getExtraScrollChance(equip);
-                success = true;
-                for (Map.Entry<EnchantStat, Integer> entry : getStats().entrySet()) {
-                    EnchantStat es = entry.getKey();
-                    int val = entry.getValue();
-                    equip.addStat(es.getEquipBaseStat(), val);
+                int chance = getChance() + chr.getAvatarData().getCharacterStat().getExtraScrollChance(equip);
+                success = Util.succeedProp(chance); // Set for auto true
+                if (success) {
+                    for (Map.Entry<EnchantStat, Integer> entry : getStats().entrySet()) {
+                        EnchantStat es = entry.getKey();
+                        int val = entry.getValue();
+                        equip.addStat(es.getEquipBaseStat(), val);
+                    }
+                    equip.addStat(EquipBaseStat.tuc, -1);
+                    equip.addStat(EquipBaseStat.cuc, 1);
+                } else {
+                    if (!equip.hasAttribute(EquipAttribute.UpgradeCountProtection)) {
+                        equip.addStat(EquipBaseStat.tuc, -1);
+                    }
                 }
-                equip.addStat(EquipBaseStat.tuc, -1);
-                equip.addStat(EquipBaseStat.cuc, 1);
                 equip.removeAttribute(EquipAttribute.LuckyDay);
                 equip.removeAttribute(EquipAttribute.UpgradeCountProtection);
                 break;

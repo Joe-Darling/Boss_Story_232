@@ -79,7 +79,7 @@ public class GameConstants {
     public static final int MAX_DROP_CHANCE = 10000;
 
     // Combo Kill
-    public static final int COMBO_KILL_RESET_TIMER = 7000000; // 7 sec
+    public static final int COMBO_KILL_RESET_TIMER = 60000; // 1 minute
     public static final int COMBO_KILL_REWARD_BLUE = 10; // Combo kills
     public static final int COMBO_KILL_REWARD_PURPLE = 20; // Combo kills
     public static final int COMBO_KILL_REWARD_RED = 30; // Combo kills
@@ -1218,7 +1218,6 @@ public class GameConstants {
     }
 
     public static int getEnchantmentSuccessRate(Equip equip) {
-
         return 1000;
 
 //        if (equip.getDropStreak() >= 2) {

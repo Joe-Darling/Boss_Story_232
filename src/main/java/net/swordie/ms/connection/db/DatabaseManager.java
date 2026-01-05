@@ -45,6 +45,7 @@ import net.swordie.ms.client.guild.bbs.BBSRecord;
 import net.swordie.ms.client.guild.bbs.BBSReply;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.connection.db.managers.HibernateDatabaseManager;
+
 import net.swordie.ms.connection.db.managers.IDatabaseManager;
 import net.swordie.ms.connection.db.managers.SwordieSqlDatabaseManager;
 import net.swordie.ms.life.Familiar;

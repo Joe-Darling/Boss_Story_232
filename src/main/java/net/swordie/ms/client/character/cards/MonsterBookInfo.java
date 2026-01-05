@@ -23,6 +23,7 @@ public class MonsterBookInfo {
     @CollectionTable(name = "monsterbookcards", joinColumns = @JoinColumn(name = "bookID"))
     @Column(name = "cardID")
     @LazyCollection(LazyCollectionOption.FALSE)
+
     private Set<Integer> cards = new HashSet<>();
 
     private int setID;

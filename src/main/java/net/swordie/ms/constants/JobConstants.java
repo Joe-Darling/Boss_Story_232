@@ -536,6 +536,8 @@ public class JobConstants {
         switch (beginnerJob) {
             case 0:
                 return isExplorer(job);
+            case 2000:
+                return isAran(job);
             case 2001:
                 return isEvan(job);
             case 2002:
@@ -1804,7 +1806,6 @@ public class JobConstants {
         return  VSkillsToGiveUponReachingV.get(jobId);
     }
 
-    // Add this method to JobConstants.java
     public static List<Integer> getJobAdvancementOptions(int currentJob, int level) {
         List<Integer> options = new ArrayList<>();
 
@@ -1816,7 +1817,7 @@ public class JobConstants {
                 options.add(JobEnum.BOWMAN.getJobId());
                 options.add(JobEnum.THIEF.getJobId());
                 options.add(JobEnum.PIRATE.getJobId());
-                options.add(JobEnum.PIRATE_CANNONEER.getJobId()); // Cannoneer starts from Beginner in some versions, or 501
+                options.add(JobEnum.PIRATE_CANNONEER.getJobId());
                 options.add(JobEnum.JETT_1.getJobId());
             } else if (currentJob == JobEnum.NOBLESSE.getJobId()) {
                 options.add(JobEnum.DAWN_WARRIOR_1.getJobId());

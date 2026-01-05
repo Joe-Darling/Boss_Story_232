@@ -41,6 +41,7 @@ import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.RandomPortal;
 import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.loaders.EventListData;
 import net.swordie.ms.util.AntiMacro;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
@@ -912,6 +913,25 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket requestEventList(int levelReq, boolean show, List<EventListData.EventListDataRecord> eventList) {
+        OutPacket outPacket = new OutPacket(OutHeader.REQUEST_EVENT_LIST);
+
+        outPacket.encodeInt(levelReq);
+        outPacket.encodeByte(show);
+        if (show) {
+            outPacket.encodeString("");
+            outPacket.encodeByte(0);
+            outPacket.encodeInt(0);
+
+            EventListData.encode(outPacket, eventList);
+
+            outPacket.encodeInt(0);
+            outPacket.encodeInt(0);
+        }
+
+        return outPacket;
+    }
+
     public static OutPacket randomPortalNotice(RandomPortal randomPortal) {
         OutPacket outPacket = new OutPacket(OutHeader.RANDOM_PORTAL_NOTICE);
 
@@ -1197,7 +1217,8 @@ public class WvsContext {
                     outPacket.encodeInt(firstEnterReward.getRewardType().getVal()); // nRewardType: 1 = Item, 2 = Item, 3 = Maple Points, 4 = Meso, 5 = EXP
                     int itemId = 0;
                     int quantity = 0;
-                    if(firstEnterReward.getRewardType() == FirstEnterRewardType.Item){
+
+                    if(firstEnterReward.getRewardType() == FirstEnterRewardType.CashItem || firstEnterReward.getRewardType() == FirstEnterRewardType.GameItem){
                         itemId = firstEnterReward.getItemId();
                         quantity = firstEnterReward.getQuantity();
                     }
@@ -1207,7 +1228,7 @@ public class WvsContext {
                     outPacket.encodeFT(firstEnterReward.getExpireTime());
                     outPacket.encodeInt(13);
                     int maplePoints = 0;
-                    if(firstEnterReward.getRewardType() == FirstEnterRewardType.Maple_Points){
+                    if(firstEnterReward.getRewardType() == FirstEnterRewardType.MaplePoints){
                         maplePoints = firstEnterReward.getQuantity();
                     }
                     outPacket.encodeInt(maplePoints); // nMaplePoints

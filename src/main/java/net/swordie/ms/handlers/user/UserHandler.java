@@ -66,6 +66,7 @@ import java.util.List;
 import java.util.Set;
 
 import static net.swordie.ms.enums.ChatType.SystemNotice;
+import static net.swordie.ms.enums.FirstEnterRewardType.*;
 
 public class UserHandler {
 
@@ -630,6 +631,13 @@ public class UserHandler {
         }
     }
 
+    @Handler(op = InHeader.REQUEST_EVENT_LIST)
+    public static void handleEventListRequest(Client c, InPacket inPacket) {
+        boolean show = true;
+        var eventList = EventListData.getActiveEvents();
+        c.write(WvsContext.requestEventList(c.getChr().getLevel(), show, eventList));
+    }
+
     @Handler(op = InHeader.ACHIEVEMENT_REQUEST)
     public static void handleAchievementRequest(Char chr, InPacket inPacket) {
         int type = inPacket.decodeInt();
@@ -781,7 +789,7 @@ public class UserHandler {
         }
 
         if(refused){ //Refused reward
-            chr.getFirstEnterRewards().remove(claimTarget);
+            chr.removeFirstEnterReward(claimTarget);
             chr.write(WvsContext.firstEnterReward(chr.getFirstEnterRewards(), FirstEnterRewardPacketType.Load_Items, 0));
             return;
         }
@@ -796,14 +804,16 @@ public class UserHandler {
         boolean claimed = false;
         switch(claimTarget.getRewardType())
         {
-            case Item:
+            case GameItem:
+            case CashItem:
                 if(chr.canHold(claimTarget.getItemId(), claimTarget.getQuantity())){
                     chr.addItemToInventory(claimTarget.getItemId(), claimTarget.getQuantity());
                     chr.write(WvsContext.firstEnterReward(chr.getFirstEnterRewards(), FirstEnterRewardPacketType.Item_Claimed, claimTarget.getQuantity()));
                     claimed = true;
                 }
                 break;
-            case Maple_Points:
+
+            case MaplePoints:
                 chr.addNx(claimTarget.getQuantity());
                 chr.write(WvsContext.firstEnterReward(chr.getFirstEnterRewards(), FirstEnterRewardPacketType.Nx_Claimed, claimTarget.getQuantity()));
                 claimed = true;
@@ -819,6 +829,9 @@ public class UserHandler {
                 chr.addExp(claimTarget.getQuantity());
                 chr.write(WvsContext.firstEnterReward(chr.getFirstEnterRewards(), FirstEnterRewardPacketType.Exp_Claimed, claimTarget.getQuantity()));
                 claimed = true;
+                break;
+            default:
+                chr.chatMessage("Unknown reward type");
                 break;
         }
         if(claimed){

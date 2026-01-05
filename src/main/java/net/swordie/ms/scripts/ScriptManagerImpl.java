@@ -173,6 +173,7 @@ public class ScriptManagerImpl implements ScriptManager {
     }
 
     public Bindings getBindingsByType(ScriptType scriptType) {
+
         ScriptInfo si = getScriptInfoByType(scriptType);
         return si == null ? null : si.getBindings();
     }

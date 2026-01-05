@@ -5,6 +5,7 @@ import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.User;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.FirstEnterReward;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.items.ItemOption;
@@ -79,6 +80,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -123,6 +125,32 @@ public class AdminCommands {
                     chr.chatMessage(Expedition, str.toString());
                 }
             }
+        }
+    }
+
+    @Command(names = {"warphere"}, requiredType = GameMaster)
+    public static class WarpHere extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            Char victim = chr.getWorld().getCharByName((args[1]));
+            if (victim != null) {
+                victim.changeChannelAndWarp((byte) chr.getClient().getChannelInstance().getChannelId(), chr.getFieldID());
+            } else {
+                chr.chatMessage(Notice2, "Player not found, make sure you typed the correct name (Case Sensitive).");
+            }
+        }
+    }
+    @Command(names = {"givenx"}, requiredType = GameMaster)
+    public static class giveNx extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            if (args.length < 3) {
+                chr.chatMessage("Usage: !givenx [name] [amount]");
+                return;
+            }
+            String name = args[1];
+            int amount = Integer.valueOf(args[2]);
+            Char other = chr.getWorld().getCharByName(name);
+            other.addNx(amount);
         }
     }
 
@@ -982,7 +1010,8 @@ public class AdminCommands {
         }
     }
 
-    @Command(names = {"getitem"}, requiredType = Tester)
+
+    @Command(names = {"getitem", "item"}, requiredType = Tester)
     public static class GetItem extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             short quant = 1;
@@ -2446,7 +2475,8 @@ public class AdminCommands {
 
     @Command(names = {"dc"}, requiredType = GameMaster)
     public static class dc extends AdminCommand {
-        public static void execute (Char chr, String[] args) {
+
+        public static void execute(Char chr, String[] args) {
             if (args.length < 2) {
                 chr.chatMessage(SpeakerChannel, "Not enough args! Use !dc <name>");
                 return;
@@ -3413,24 +3443,15 @@ public class AdminCommands {
             field.spawnLife(npc, null);
             log.debug("npc has id " + npc.getObjectId());
 
-            try (Session session = DatabaseManager.getSession()) {
-                Transaction transaction = session.beginTransaction();
-
-                Query npcQuery = session.createNativeQuery("INSERT INTO npc (npcid,mapid,x,y,cy,rx0,rx1,fh) VALUES (:npcid,:mapid,:x,:y,:cy,:rx0,:rx1,:fh)");
-                npcQuery.setParameter("npcid", id);
-                npcQuery.setParameter("mapid", field.getId());
-                npcQuery.setParameter("x", pos.getX());
-                npcQuery.setParameter("y", pos.getY());
-                npcQuery.setParameter("cy", npc.getCy());
-                npcQuery.setParameter("rx0", npc.getRx0());
-                npcQuery.setParameter("rx1", npc.getRx1());
-                npcQuery.setParameter("fh", npc.getFh());
-
-
-                npcQuery.executeUpdate();
-
-                transaction.commit();
-            }
+            DatabaseManager.executeInsert("INSERT INTO npc (npcid,mapid,x,y,cy,rx0,rx1,fh) VALUES (?,?,?,?,?,?,?,?)",
+                    id,
+                    field.getId(),
+                    pos.getX(),
+                    pos.getY(),
+                    npc.getCy(),
+                    npc.getRx0(),
+                    npc.getRx1(),
+                    npc.getFh());
         }
     }
 
@@ -4102,5 +4123,45 @@ public class AdminCommands {
             chr.getScriptManager().setActionBar(true, ActionBarType.getByVal(Integer.parseInt(args[1])));
         }
 
+    }
+
+    @Command(names = {"gift"}, requiredType = Admin)
+    public static class GiftBox extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            if (args.length < 4) {
+                chr.chatMessage("Usage: !gift <player> <itemID> <quantity> <message>");
+                return;
+            }
+            String targetName = args[1];
+            int itemid = Integer.parseInt(args[2]);
+            int quantity = Integer.parseInt(args[3]);
+            String message = (args.length >= 5)
+                    ? String.join(" ", java.util.Arrays.copyOfRange(args, 4, args.length))
+                    : "Default msg";
+
+            Char targetChr = Server.getInstance().getWorldById(chr.getClient().getWorldId()).getCharByName(targetName);
+            boolean online = true;
+            if (targetChr == null) {
+                online = false;
+                targetChr = charDao.getByNameAndWorld(targetName, chr.getAccount().getWorldId());
+                if (targetChr == null) {
+                    chr.chatMessage(SpeakerChannel, "Could not find that character.");
+                    return;
+                }
+                Account account = accountDao.getByCharId(targetChr.getId());
+                targetChr.setAccount(account);
+            }
+
+            int targetId = targetChr.getId();
+
+            FirstEnterReward reward = new FirstEnterReward(targetId, itemid, quantity, FirstEnterRewardType.GameItem, message);
+
+            targetChr.addFirstEnterReward(reward);
+            if (online) {
+                targetChr.checkFirstEnterReward();
+            }
+            chr.chatMessage("Gift Sent!, target is online: " + online);
+        }
     }
 }

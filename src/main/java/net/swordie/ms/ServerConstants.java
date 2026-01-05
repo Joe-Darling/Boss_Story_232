@@ -7,7 +7,9 @@ public class ServerConstants {
 	public static final String DIR = System.getProperty("user.dir");
 	public static final byte LOCALE = 8;
 	public static final String BAT_DIR = DIR + "/bat";
+
 	public static final String WZ_DIR = "C:/Users/Joe/Documents/Maplestory Clients/Ms-v232";
+
 	public static final String DAT_DIR = DIR + "/dat";
 	public static final String LOG_DIR = DIR + "/logs";
 	public static final String SQL_DIR = DIR + "/sql";
@@ -27,6 +29,7 @@ public class ServerConstants {
 	public static final int BCRYPT_ITERATIONS = 5;
 	public static final long TOKEN_EXPIRY_TIME = 60 * 24; // 24h
 	public static final long CLEAR_CACHE_RATE = 4; // 24h
+	public static boolean CHECK_WZ_ON_LOGIN = false;
 
 	// Tespia
 	public static final boolean IS_TESPIA = false; // set true if Tespia instance of server.
