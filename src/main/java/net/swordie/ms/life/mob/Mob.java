@@ -691,7 +691,7 @@ public class Mob extends Life {
         Map<Party, PartyDamageInfo> damagePercPerParty = new HashMap<>();
         for (Char chr : getDamageDone().keySet()) {
             double damagePerc = getDamageDone().get(chr) / (double) totalDamage;
-            int mobExpRate = chr.getLevel() < 10 ? 1 : GameConstants.MOB_EXP_RATE * Server.CUSTOM_EXP_RATE; // Make this per character
+            int mobExpRate = chr.getLevel() < 10 ? 1 : GameConstants.MOB_EXP_RATE * chr.getCustomExpRate();
             long appliedExpPre = (long) (exp * damagePerc * mobExpRate);
             long appliedExpPost = appliedExpPre;
             ExpIncreaseInfo eei = new ExpIncreaseInfo();

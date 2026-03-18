@@ -63,6 +63,12 @@
     <dependencies>
 
         <!-- General code -->
+        <!-- Fix jboss-logging version conflict between Hibernate and RESTEasy 7.x -->
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+            <version>3.6.1.Final</version>
+        </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>javax.mail-api</artifactId>
@@ -79,7 +85,6 @@
             <version>4.2.9.Final</version>
             <scope>compile</scope>
         </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.openjdk.nashorn/nashorn-core -->
         <dependency>
             <groupId>org.openjdk.nashorn</groupId>

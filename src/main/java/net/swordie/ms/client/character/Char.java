@@ -358,6 +358,7 @@ public class Char {
     private Set<FirstEnterReward> firstEnterRewards;
     private MiniRoom miniRoom;
     private List<MiniGameRecord> miniGameRecords;
+    private int customExpRate = 1;
 
     public Char() {
         itemPots = new ArrayList<>();
@@ -930,6 +931,14 @@ public class Char {
         Map<Stat, Object> stats = new HashMap<>();
         stats.put(Stat.sp, getAvatarData().getCharacterStat().getExtendSP());
         write(WvsContext.statChanged(stats));
+    }
+
+    public int getCustomExpRate() {
+        return customExpRate;
+    }
+
+    public void setCustomExpRate(int rate) {
+        this.customExpRate = rate;
     }
 
     public Set<Skill> getSkills() {

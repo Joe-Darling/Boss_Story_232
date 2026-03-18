@@ -1208,11 +1208,8 @@ public class AdminCommands {
     public static class JobAdv extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            // Run in a separate thread to allow the ScriptManager UI loop to function (waiting for responses)
             new Thread(() -> {
                 ScriptManagerImpl sm = (ScriptManagerImpl) chr.getScriptManager();
-                // Manually create a ScriptInfo to trick the SM into thinking a script is active
-                // This allows UI methods like sendSay/sendAskYesNo to work without a real .py file
                 ScriptInfo scriptInfo = new ScriptInfo(ScriptType.Npc, sm.getBindingsByType(ScriptType.Npc), 0, "jobadv_cmd");
                 scriptInfo.setActive(true);
                 sm.getScripts().put(ScriptType.Npc, scriptInfo);
@@ -1222,7 +1219,6 @@ public class AdminCommands {
                     int currentJob = chr.getJob();
                     int level = chr.getLevel();
 
-                    // 1. Get Options from JobConstants
                     List<Integer> nextJobs = JobConstants.getJobAdvancementOptions(currentJob, level);
 
                     if (nextJobs.isEmpty()) {
@@ -1232,7 +1228,6 @@ public class AdminCommands {
 
                     int selectedJob;
 
-                    // 2. Handle Branching Paths
                     if (nextJobs.size() > 1) {
                         StringBuilder menu = new StringBuilder("Select your desired job advancement:\r\n");
                         for (int i = 0; i < nextJobs.size(); i++) {
@@ -1240,14 +1235,12 @@ public class AdminCommands {
                             jobName = formatJobName(jobName);
                             menu.append("#L").append(i).append("#").append(jobName).append("#l\r\n");
                         }
-                        // sm.sendSay automatically detects #L tags and treats it as a menu
                         int selection = sm.sendSay(menu.toString());
                         selectedJob = nextJobs.get(selection);
                     } else {
                         selectedJob = nextJobs.get(0);
                     }
 
-                    // 3. Confirmation Window
                     String jobName = JobConstants.JobEnum.getJobById((short) selectedJob).name();
                     jobName = formatJobName(jobName);
 
@@ -1255,7 +1248,24 @@ public class AdminCommands {
 
                     if (confirmed) {
                         chr.setJob((short) selectedJob);
-                        sm.sendSayOkay("Congratulations! You have advanced to #b" + jobName + "#k.");
+
+                        // Calculate SP: 4 base + 3 per missed level
+                        int requiredLevel = JobConstants.getRequiredLevelForJob(selectedJob);
+                        int missedLevels = Math.max(0, level - requiredLevel);
+                        int sp = 4 + (3 * missedLevels);
+
+                        if (JobConstants.isExtendSpJob(chr.getJob())) {
+                            chr.setSpToCurrentJob(sp);
+                            Map<Stat, Object> stats = new HashMap<>();
+                            stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
+                            chr.write(WvsContext.statChanged(stats));
+                        } else {
+                            chr.getAvatarData().getCharacterStat().setSp(sp);
+                            Map<Stat, Object> stats = new HashMap<>();
+                            stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getSp());
+                            chr.write(WvsContext.statChanged(stats));
+                        }
+                        sm.sendSayOkay("Congratulations! You have advanced to #b" + jobName + "#k.\r\nYou received #b" + sp + "#k SP.");
                     } else {
                         sm.sendSayOkay("Job advancement cancelled.");
                     }
@@ -1263,13 +1273,11 @@ public class AdminCommands {
                 } catch (Exception e) {
                     // Catches interruptions (like closing the chat window)
                 } finally {
-                    // Clean up the dummy script context so the player isn't stuck in "script mode"
                     sm.dispose(false);
                 }
             }).start();
         }
 
-        // Helper to formatting ENUM_NAME to Enum Name
         private static String formatJobName(String name) {
             if (name == null || name.isEmpty()) return name;
             String[] words = name.toLowerCase().split("_");
@@ -1382,14 +1390,39 @@ public class AdminCommands {
             try {
                 int num = Integer.parseInt(args[1]);
                 if (num >= 0) {
-                    Server.CUSTOM_EXP_RATE = num;
-                    chr.chatMessage(Expedition, "Rate changed to " + num);
-                }
-                else{
+                    chr.setCustomExpRate(num);
+                    chr.chatMessage(Expedition, "Your EXP rate changed to " + num + "x");
+                } else {
                     chr.chatMessage(Expedition, "Rate must be at least 0");
                 }
-            }catch (Exception e){
-                chr.chatMessage(Expedition, "Error: " + e.getMessage());
+            } catch (Exception e) {
+                chr.chatMessage(Expedition, "Usage: !setexp <rate>");
+            }
+        }
+    }
+
+    @Command(names = {"bailey", "baileyBuff"}, requiredType = Admin) //
+    public static class BaileyBuff extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            try {
+                chr.setCustomExpRate(3);
+                chr.chatMessage(Expedition, "Your EXP rate changed to " + 3 + "x");
+                Item item = ItemData.getItemDeepCopy(2022176, true);
+                item.setQuantity(100);
+                chr.addItemToInventory(item);
+                chr.chatMessage(Expedition, "Gave 100 power elixirs");
+                item = ItemData.getItemDeepCopy(4001832, true);
+                item.setQuantity(5000);
+                chr.addItemToInventory(item);
+                chr.chatMessage(Expedition, "Gave 5000 spell traces");
+                item = ItemData.getItemDeepCopy(2435719, true);
+                item.setQuantity(500);
+                chr.addItemToInventory(item);
+                chr.chatMessage(Expedition, "Gave 500 Node Fragments");
+                chr.addMoney(1000000000);
+                chr.chatMessage(Expedition, "Gave 1 billion mesos");
+            } catch (Exception e) {
+                chr.chatMessage(Expedition, e.getMessage());
             }
         }
     }

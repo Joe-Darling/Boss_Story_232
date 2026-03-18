@@ -1763,6 +1763,9 @@ public class Equip extends Item {
     // Boss rewards are guaranteed to give 4 bonus stats.
     public void randomizeFlameStats(boolean obtained) {
         resetFlameStats();
+        if(true){
+            return; // We don't do this here
+        }
 
         if (!ItemConstants.canEquipHaveFlame(this)) {
             // This equip type is not eligible for bonus stats.

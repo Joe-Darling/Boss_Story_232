@@ -11,7 +11,7 @@ public class CustomConstants {
 
     public static final boolean AUTO_AGGRO = false;
     public static final int PET_VAC = 4030003;
-    public static final int PET_VAC_DELAY = 5000; // in millis
+    public static final int PET_VAC_DELAY = 1; // in millis
     public static final int PET_VAC_SKILL_ID = 899999990;
 
 

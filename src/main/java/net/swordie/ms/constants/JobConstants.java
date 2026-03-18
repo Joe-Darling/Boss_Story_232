@@ -1880,6 +1880,8 @@ public class JobConstants {
             } else if (currentJob == JobEnum.PIRATE.getJobId()) {
                 options.add(JobEnum.BRAWLER.getJobId());
                 options.add(JobEnum.GUNSLINGER.getJobId());
+            } else if (currentJob == JobEnum.JETT_1.getJobId()){
+                options.add(JobEnum.JETT_2.getJobId());
             }
             // Dual Blade Special Case: Blade Recruit (430) -> Blade Acolyte (431)
             else if (currentJob == JobEnum.BLADE_RECRUIT.getJobId()) options.add(JobEnum.BLADE_ACOLYTE.getJobId());
@@ -1963,5 +1965,44 @@ public class JobConstants {
             }
         }
         return validOptions;
+    }
+
+    /**
+     * Returns the minimum level required for a job advancement based on the target job ID.
+     * Used to calculate bonus SP for players who advance past the normal level.
+     */
+    public static int getRequiredLevelForJob(int jobId) {
+        // Dual Blade has unique advancement levels
+        if (jobId == JobConstants.JobEnum.BLADE_RECRUIT.getJobId()) {
+            return 20;
+        }
+        if (jobId == JobConstants.JobEnum.BLADE_ACOLYTE.getJobId()) {
+            return 30;
+        }
+        if (jobId == JobConstants.JobEnum.BLADE_SPECIALIST.getJobId()) {
+            return 45;
+        }
+        if (jobId == JobConstants.JobEnum.BLADE_LORD.getJobId()) {
+            return 60;
+        }
+        if (jobId == JobConstants.JobEnum.BLADE_MASTER.getJobId()) {
+            return 100;
+        }
+
+        // Use existing getJobLevel to determine job tier, then map to required level
+        int jobLevel = getJobLevel(jobId);
+
+        switch (jobLevel) {
+            case 1: // 1st job
+                return 10;
+            case 2: // 2nd job
+                return 30;
+            case 3: // 3rd job
+                return 60;
+            case 4: // 4th job
+                return 100;
+            default:
+                return 10;
+        }
     }
 }
